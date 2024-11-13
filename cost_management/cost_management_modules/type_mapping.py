@@ -7,6 +7,7 @@ kosten_typing =   {
     "Kosten": "decimal",
     "Datum": "date",
     "Service": "nvarchar",
+    "Klant": "nvarchar",
     "Valuta": "nvarchar",
 }
 

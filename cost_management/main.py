@@ -7,7 +7,7 @@ from cost_management_modules.database import connect_to_database, write_to_datab
 from cost_management_modules.log import log
 from cost_management_modules.config import fetch_script_id, fetch_all_connection_strings
 from cost_management_modules.type_mapping import convert_column_types, kosten_typing
-from cost_management_modules.table_mapping import transform_columns, kosten
+from cost_management_modules.table_mapping import transform_columns, kosten, klant_vervangen
 import pandas as pd
 import time
 import logging
@@ -108,28 +108,32 @@ def main():
 
     # JSON-body voor het opvragen van de kosten voor de huidige maand per dag
     cost_body = {
-        "type": "ActualCost",
-        "timeframe": "Custom",
-        "timePeriod": {
-            "from": start_date,
-            "to": end_date
+    "type": "ActualCost",
+    "timeframe": "Custom",
+    "timePeriod": {
+        "from": start_date,
+        "to": end_date
+    },
+    "dataset": {
+        "granularity": "Daily",
+        "aggregation": {
+            "totalCost": {
+                "name": "PreTaxCost",
+                "function": "Sum"
+            }
         },
-        "dataset": {
-            "granularity": "Daily",
-            "aggregation": {
-                "totalCost": {
-                    "name": "PreTaxCost",
-                    "function": "Sum"
-                }
+        "grouping": [
+            {
+                "type": "Dimension",
+                "name": "ServiceName"
             },
-            "grouping": [
-                {
-                    "type": "Dimension",
-                    "name": "ServiceName"
-                }
-            ]
-        }
+            {
+                "type": "Dimension",
+                "name": "ResourceGroup"  # Groeperen op ResourceGroup
+            }
+        ]
     }
+}
 
     # Headers voor het verzoek
     headers = {
@@ -161,9 +165,6 @@ def main():
     column_names = [col["name"] for col in json_data["properties"]["columns"]]
     rows = json_data["properties"]["rows"]
     df = pd.DataFrame(rows, columns=column_names)
-
-    # Voeg Klant kolom toe
-    df['Klant'] = klant
 
     # Kolom mapping
     column_mapping = {
@@ -198,7 +199,10 @@ def main():
                 logging.error(f"FOUTMELDING | Kolommen type conversie mislukt: {e}")
                 log(greit_connection_string, klant, bron, f"FOUTMELDING | Kolommen type conversie mislukt: {e}", script, script_id, tabel)
                 return
-    print(df.head())
+
+    # Klant aanpassen
+    df['Klant'] = df['Klant'].apply(klant_vervangen)
+
     # Tabel leeg maken
     try:
         clear_table(greit_connection_string, tabel, klant)

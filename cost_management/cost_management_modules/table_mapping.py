@@ -2,6 +2,7 @@ kosten =   {
     "PreTaxCost": "Kosten",
     "UsageDate": "Datum",
     "ServiceName": "Service",
+    "ResourceGroup": "Klant",
     "Currency": "Valuta"
 }
 
@@ -17,3 +18,9 @@ def transform_columns(df, column_mapping):
     df = df.rename(columns=column_mapping)
 
     return df
+
+def klant_vervangen(klant):
+    if 'borst_bloembollen' in klant:
+        return 'Borst'
+    else:
+        return 'Greit'
