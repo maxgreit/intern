@@ -23,7 +23,7 @@ default_args = {
 
 # Definieer de DAG
 dag = DAG(
-    'greit_daily_dag_v01',
+    'greit_monthly_dag_v01',
     default_args=default_args,
     description='Data update',
     schedule_interval="0 8 1 * *",
