@@ -37,6 +37,12 @@ cost_management_taak = BashOperator(
         dag=dag,
 )
 
+aandelen_taak = BashOperator(
+        task_id='aandelen',
+        bash_command=venv_command("/home/greit/klanten/intern/aandelen/main.py"),
+        dag=dag,
+)
+
 start_parallel_tasks = EmptyOperator(
         task_id='start_parallel_tasks',
         dag=dag,
