@@ -4,9 +4,9 @@ import os
 
 def determine_base_dir():
     if "maxrood" in os.path.expanduser("~"):  # Specifiek voor je MacBook
-            return "/Users/maxrood/werk/greit/klanten/stiek/"
+            return "/Users/maxrood/werk/greit/greit_scripts/"
     else:  # Voor je VM
-        return "/home/greit/klanten/stiek/"
+        return "/home/greit/klanten/intern/"
 
 def env_check():
     base_dir = determine_base_dir()
