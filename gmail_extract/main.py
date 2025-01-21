@@ -12,7 +12,7 @@ import time
 import os
 
 def main():
-
+    
     # Lokaal of productieomgeving bepaling
     env_check()
     
@@ -46,7 +46,7 @@ def main():
 
         # Mails ophalen
         df = mail_dataframe(gmail_start_datum, gmail_eind_datum)
-        
+
         # Kolommen aanpassen
         altered_df = apply_mapping(df, greit_connection_string, klant, bron, script, script_id)
         

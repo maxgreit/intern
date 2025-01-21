@@ -6,8 +6,12 @@ import pandas as pd
 def mail_dataframe(start_datum, eind_datum):
 
     # Gmail initialiseren
-    gmail = Gmail()
-
+    try:
+        gmail = Gmail()
+    except Exception as e:
+        print(f"FOUTMELDING | Gmail initialiseren mislukt: {e}")
+        return
+    
     # Query parameters definiëren
     query_params = {
         "sender": "notificaties@degiro.nl",

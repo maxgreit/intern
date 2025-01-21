@@ -6,7 +6,8 @@ __pycache__/
 # C extensions
 *.so
 
-gmail_extract/client_secret.json
+client_secret.json
+gmail_token.json
 
 # Distribution / packaging
 .Python
