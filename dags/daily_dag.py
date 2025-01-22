@@ -23,7 +23,7 @@ default_args = {
 
 # Definieer de DAG
 dag = DAG(
-    'greit_daily_dag_v01',
+    'greit_daily_dag_v02',
     default_args=default_args,
     description='Data update',
     schedule_interval="0 8 * * *",
@@ -39,7 +39,7 @@ cost_management_taak = BashOperator(
 
 aandelen_taak = BashOperator(
         task_id='aandelen',
-        bash_command=venv_command("/home/greit/klanten/intern/aandelen/main.py"),
+        bash_command=venv_command("/home/greit/klanten/intern/gmail_extract/main.py"),
         dag=dag,
 )
 
