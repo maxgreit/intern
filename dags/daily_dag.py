@@ -56,5 +56,6 @@ end_parallel_tasks = EmptyOperator(
 # Taak structuur
 start_parallel_tasks >> [
     cost_management_taak,
+    aandelen_taak,
 ] >> end_parallel_tasks
                           
