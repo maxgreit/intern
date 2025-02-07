@@ -25,18 +25,7 @@ wcapi = API(
 
 @app.route('/abonnementen/<email>', methods=['GET'])
 def get_subscriptions(email):
-    try:
-        # Haal alle informatie op
-        response = wcapi.get("subscriptions", params={"search": email})
-        
-        if response.status_code != 200:
-            return jsonify({"error": "Geen informatie kunnen ophalen", "status": response.status_code}), response.status_code
-        
-        subscriptions = response.json()
-        
-        return jsonify({"email": email, "abonnement": subscriptions})
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
+    return jsonify({"email": email})
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=8443)
