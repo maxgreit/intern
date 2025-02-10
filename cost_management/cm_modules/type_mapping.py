@@ -1,5 +1,4 @@
 import pandas as pd
-from cm_modules.log import log
 import logging
 
 kosten_typing =   {
@@ -52,7 +51,7 @@ def convert_column_types(df, column_types):
     
     return df
 
-def apply_typing(df, greit_connection_string, klant, bron, script, script_id):
+def apply_typing(df):
     # Kolom typing
     column_typing = {
         'Kosten': kosten_typing,
@@ -64,10 +63,8 @@ def apply_typing(df, greit_connection_string, klant, bron, script, script_id):
             try:
                 converted_df = convert_column_types(df, typing)
                 logging.info(f"Kolommen type conversie")
-                log(greit_connection_string, klant, bron, f"Kolommen type conversie correct uitgevoerd", script, script_id, tabel)
             except Exception as e:
-                logging.error(f"FOUTMELDING | Kolommen type conversie mislukt: {e}")
-                log(greit_connection_string, klant, bron, f"FOUTMELDING | Kolommen type conversie mislukt: {e}", script, script_id, tabel)
+                logging.error(f"Kolommen type conversie mislukt: {e}")
                 return
     
     return converted_df

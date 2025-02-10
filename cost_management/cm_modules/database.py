@@ -1,12 +1,8 @@
-
-from datetime import datetime, timedelta
 from sqlalchemy import create_engine
-from cm_modules.log import log
 import logging
 import urllib
 import pyodbc
 import time
-
 
 def connect_to_database(connection_string):
     # Retries en delays
@@ -45,15 +41,15 @@ def clear_table(connection_string, table, begindatum_str, einddatum_str, klant):
                 WHERE Datum >= ? AND Datum <= ? AND Klant = ?
             """, (begindatum_str, einddatum_str, klant))
             rows_deleted = cursor.rowcount  # Houd het aantal verwijderde rijen bij
-            print(f"Aantal verwijderde rijen voor klant '{klant}': {rows_deleted}")
+            logging.info(f"Aantal verwijderde rijen voor klant '{klant}': {rows_deleted}")
         except pyodbc.Error as e:
-            print(f"DELETE FROM {table} voor klant '{klant}' en periode (van {begindatum_str} tot {einddatum_str}) is mislukt: {e}")
+            logging.error(f"DELETE FROM {table} voor klant '{klant}' en periode (van {begindatum_str} tot {einddatum_str}) is mislukt: {e}")
         
         # Commit de transactie
         connection.commit()
-        print(f"Leeggooien succesvol uitgevoerd voor tabel {table}.")
+        logging.info(f"Leeggooien succesvol uitgevoerd voor tabel {table}.")
     except pyodbc.Error as e:
-        print(f"Fout bij het leeggooien van tabel {table}: {e}")
+        logging.error(f"Fout bij het leeggooien van tabel {table}: {e}")
     finally:
         # Sluit de cursor en verbinding
         cursor.close()
@@ -73,15 +69,15 @@ def write_to_database(df, tabel, connection_string, batch_size=1000):
             # Schrijf direct naar de database
             batch_df.to_sql(tabel, con=engine, index=False, if_exists="append", schema="dbo")
             rows_added += len(batch_df)
-            print(f"{rows_added} rijen toegevoegd aan de tabel tot nu toe...")
+            logging.info(f"{rows_added} rijen toegevoegd aan de tabel tot nu toe...")
         
-        print(f"DataFrame succesvol toegevoegd/bijgewerkt in de tabel: {tabel}")
+        logging.info(f"DataFrame succesvol toegevoegd/bijgewerkt in de tabel: {tabel}")
     except Exception as e:
-        print(f"Fout bij het toevoegen naar de database: {e}")
+        logging.error(f"Fout bij het toevoegen naar de database: {e}")
 
     return rows_added
 
-def empty_and_fill_table(df, tabel, greit_connection_string, klant, bron, script, script_id, start_datum, eind_datum):
+def empty_and_fill_table(df, tabel, greit_connection_string, klant, start_datum, eind_datum):
     # Haal de unieke klanten uit het DataFrame
     klanten = df['Klant'].unique()
     
@@ -91,22 +87,17 @@ def empty_and_fill_table(df, tabel, greit_connection_string, klant, bron, script
         try:
             clear_table(greit_connection_string, tabel, start_datum, eind_datum, klant)
             logging.info(f"Tabel {tabel} leeg gemaakt voor klant {klant} vanaf begin van deze maand")
-            log(greit_connection_string, klant, bron, f"Tabel {tabel} leeg gemaakt voor klant {klant} vanaf begin van deze maand", script, script_id, tabel)
         except Exception as e:
-            logging.error(f"FOUTMELDING | Tabel leeg maken mislukt voor klant {klant}: {e}")
-            log(greit_connection_string, klant, bron, f"FOUTMELDING | Tabel leeg maken mislukt voor klant {klant}: {e}", script, script_id, tabel)
+            logging.error(f"Tabel leeg maken mislukt voor klant {klant}: {e}")
             continue
         
         # Tabel vullen
         try:
             logging.info(f"Volledige lengte {tabel} voor klant {klant}: {len(df[df['Klant'] == klant])}")
-            log(greit_connection_string, klant, bron, f"Volledige lengte {tabel} voor klant {klant}: {len(df[df['Klant'] == klant])}", script, script_id,  tabel)
             added_rows_count = write_to_database(df[df['Klant'] == klant], tabel, greit_connection_string)
             logging.info(f"Tabel {tabel} gevuld voor klant {klant}")
-            log(greit_connection_string, klant, bron, f"Tabel gevuld voor klant {klant} met {added_rows_count} rijen", script, script_id,  tabel)
         except Exception as e:
-            logging.error(f"FOUTMELDING | Tabel vullen mislukt voor klant {klant}: {e}")
-            log(greit_connection_string, klant, bron, f"FOUTMELDING | Tabel vullen mislukt voor klant {klant}: {e}", script, script_id,  tabel)
+            logging.error(f"Tabel vullen mislukt voor klant {klant}: {e}")
             continue
 
 

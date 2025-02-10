@@ -1,7 +1,5 @@
 
-from datetime import datetime, timedelta
 from sqlalchemy import create_engine
-from gmail_modules.log import log
 import logging
 import urllib
 import pyodbc
@@ -45,15 +43,15 @@ def clear_table(connection_string, table, begindatum_str, einddatum_str):
                 WHERE Transactiedatum >= ? AND Transactiedatum <= ?
             """, (begindatum_str, einddatum_str))
             rows_deleted = cursor.rowcount  # Houd het aantal verwijderde rijen bij
-            print(f"Aantal verwijderde rijen': {rows_deleted}")
+            logging.info(f"Aantal verwijderde rijen': {rows_deleted}")
         except pyodbc.Error as e:
-            print(f"DELETE FROM {table} voor periode (van {begindatum_str} tot {einddatum_str}) is mislukt: {e}")
+            logging.error(f"DELETE FROM {table} voor periode (van {begindatum_str} tot {einddatum_str}) is mislukt: {e}")
         
         # Commit de transactie
         connection.commit()
-        print(f"Leeggooien succesvol uitgevoerd voor tabel {table}.")
+        logging.info(f"Leeggooien succesvol uitgevoerd voor tabel {table}.")
     except pyodbc.Error as e:
-        print(f"Fout bij het leeggooien van tabel {table}: {e}")
+        logging.error(f"Fout bij het leeggooien van tabel {table}: {e}")
     finally:
         # Sluit de cursor en verbinding
         cursor.close()
@@ -73,30 +71,30 @@ def write_to_database(df, tabel, connection_string, batch_size=1000):
             # Schrijf direct naar de database
             batch_df.to_sql(tabel, con=engine, index=False, if_exists="append", schema="dbo")
             rows_added += len(batch_df)
-            print(f"{rows_added} rijen toegevoegd aan de tabel tot nu toe...")
+            logging.info(f"{rows_added} rijen toegevoegd aan de tabel tot nu toe...")
         
-        print(f"DataFrame succesvol toegevoegd/bijgewerkt in de tabel: {tabel}")
+        logging.info(f"DataFrame succesvol toegevoegd/bijgewerkt in de tabel: {tabel}")
     except Exception as e:
-        print(f"Fout bij het toevoegen naar de database: {e}")
+        logging.error(f"Fout bij het toevoegen naar de database: {e}")
 
     return rows_added
 
-def empty_and_fill_table(df, tabel, greit_connection_string, klant, bron, script, script_id, start_datum, eind_datum):
+def empty_and_fill_table(df, tabel, greit_connection_string, start_datum, eind_datum):
 
     # Tabel leeg maken
     try:
         clear_table(greit_connection_string, tabel, start_datum, eind_datum)
-        log(greit_connection_string, klant, bron, f"Tabel {tabel} leeg gemaakt vanaf begin van vorige maand", script, script_id, tabel)
+        logging.info(f"Tabel {tabel} leeg gemaakt vanaf begin van deze maand")
     except Exception as e:
-        log(greit_connection_string, klant, bron, f"FOUTMELDING | Tabel leeg maken mislukt: {e}", script, script_id, tabel)
+        logging.error(f"Tabel leeg maken mislukt: {e}")
         return
     
     # Tabel vullen
     try:
-        log(greit_connection_string, klant, bron, f"Volledige lengte {tabel}", script, script_id,  tabel)
+        logging.info(f"Volledige lengte {tabel}: {len(df)}")
         added_rows_count = write_to_database(df, tabel, greit_connection_string)
-        log(greit_connection_string, klant, bron, f"Tabel gevuld voor klant {klant} met {added_rows_count} rijen", script, script_id,  tabel)
+        logging.info(f"Tabel gevuld met {added_rows_count} rijen")
     except Exception as e:
-        log(greit_connection_string, klant, bron, f"FOUTMELDING | Tabel vullen mislukt voor klant {klant}: {e}", script, script_id,  tabel)
+        logging.error(f"Tabel vullen mislukt: {e}")
         return
 

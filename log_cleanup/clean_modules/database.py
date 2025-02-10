@@ -1,5 +1,6 @@
 from dateutil.relativedelta import relativedelta
-from datetime import datetime, timedelta
+from datetime import datetime
+import logging
 import pyodbc
 import time
 
@@ -45,15 +46,15 @@ def empty_table(greit_connection_string, klant, table):
                 WHERE Datumtijd < ? 
             """, (start_datumtijd))
             rows_deleted = cursor.rowcount  # Houd het aantal verwijderde rijen bij
-            print(f"Aantal verwijderde rijen voor klant '{klant}': {rows_deleted}")
+            logging.info(f"Aantal verwijderde rijen voor klant '{klant}': {rows_deleted}")
         except pyodbc.Error as e:
-            print(f"DELETE FROM {table} voor klant '{klant}' en periode (alles vóór {start_datum} is mislukt: {e}")
+            logging.error(f"DELETE FROM {table} voor klant '{klant}' en periode (alles vóór {start_datum} is mislukt: {e}")
         
         # Commit de transactie
         connection.commit()
-        print(f"Leeggooien succesvol uitgevoerd voor tabel {table}.")
+        logging.info(f"Leeggooien succesvol uitgevoerd voor tabel {table}.")
     except pyodbc.Error as e:
-        print(f"Fout bij het leeggooien van tabel {table}: {e}")
+        logging.error(f"Fout bij het leeggooien van tabel {table}: {e}")
     finally:
         # Sluit de cursor en verbinding
         cursor.close()

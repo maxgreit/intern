@@ -1,5 +1,4 @@
 from gmail_modules.database import connect_to_database
-from gmail_modules.log import log
 import logging
 import time
 
@@ -13,7 +12,7 @@ def fetch_current_script_id(cursor):
 
     return highest_script_id
 
-def determine_script_id(greit_connection_string, klant, bron, script):
+def determine_script_id(greit_connection_string):
     try:
         database_conn = connect_to_database(greit_connection_string)
     except Exception as e:
@@ -31,7 +30,6 @@ def determine_script_id(greit_connection_string, klant, bron, script):
         script_id = 1
         
     logging.info(f"ScriptID: {script_id}")
-    log(greit_connection_string, klant, bron, f"Script gestart", script, script_id)
     
     return script_id
 
@@ -70,18 +68,15 @@ def create_connection_dict(greit_connection_string, klant, bron, script, script_
         if connection_dict:
 
             # Start logging
-            log(greit_connection_string, klant, bron, f"Ophalen connectiestrings gestart", script, script_id)
+            logging.info(f"Ophalen connectiestrings gestart")
         else:
             # Foutmelding logging
-            print(f"FOUTMELDING | Ophalen connectiestrings mislukt na meerdere pogingen")
-            log(greit_connection_string, klant, bron, f"FOUTMELDING | Ophalen connectiestrings mislukt na meerdere pogingen", script, script_id)
+            logging.error(f"Ophalen connectiestrings mislukt na meerdere pogingen")
     else:
         # Foutmelding logging
-        print(f"FOUTMELDING | Verbinding met database mislukt na meerdere pogingen")
-        log(greit_connection_string, klant, bron, f"FOUTMELDING | Verbinding met database mislukt na meerdere pogingen", script, script_id)
+        logging.error(f"Verbinding met database mislukt na meerdere pogingen")
     
     logging.info("Configuratie dictionary opgehaald")
-    log(greit_connection_string, klant, bron, "Configuratie dictionary opgehaald", script, script_id)
     
     return connection_dict
 
@@ -138,15 +133,13 @@ def create_config_dict(klant_connection_string, greit_connection_string, klant, 
     
         if configuratie_dict:
             # Start logging
-            log(greit_connection_string, klant, bron, f"Ophalen configuratiegegevens gestart", script, script_id)
+            logging.info(f"Ophalen configuratiegegevens gestart")
         else:
             # Foutmelding logging
-            print(f"FOUTMELDING | Ophalen connectiestrings mislukt na meerdere pogingen")
-            log(greit_connection_string, klant, bron, f"FOUTMELDING | Ophalen configuratiengegevens mislukt na meerdere pogingen", script, script_id)
+            logging.error(f"Ophalen connectiestrings mislukt na meerdere pogingen")
     else:
         # Foutmelding logging
-        print(f"FOUTMELDING | Verbinding met database mislukt na meerdere pogingen")
-        log(greit_connection_string, klant, bron, f"FOUTMELDING | Verbinding met database mislukt na meerdere pogingen", script, script_id)
+        logging.error(f"Verbinding met database mislukt na meerdere pogingen")
     
     return configuratie_dict
 

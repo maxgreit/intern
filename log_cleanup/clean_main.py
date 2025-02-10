@@ -1,7 +1,7 @@
 from clean_modules.config import determine_script_id
+from clean_modules.log import setup_logging, end_log
 from clean_modules.database import empty_table
 from clean_modules.env_tool import env_check
-from clean_modules.log import log, end_log
 import logging
 import time
 import os
@@ -23,22 +23,26 @@ def main():
     database = os.getenv('DATABASE')
     server = os.getenv('SERVER')
     driver = '{ODBC Driver 18 for SQL Server}'
-    tabel = 'Logging'
+    tabel = 'Logboek'
     greit_connection_string = f'DRIVER={driver};SERVER={server};DATABASE={database};UID={username};PWD={password};Encrypt=yes;TrustServerCertificate=no;Connection Timeout=60;'
     
-    try:
-        # Script ID bepalen
-        script_id = determine_script_id(greit_connection_string, klant, bron, script)
+    # Script ID bepalen
+    script_id = determine_script_id(greit_connection_string)
 
+    # Set up logging (met database logging)
+    setup_logging(greit_connection_string, klant, bron, script, script_id)
+    
+    try:
         # Tabel legen en vullen
         empty_table(greit_connection_string, klant, tabel)
 
     except Exception as e:
-        logging.error(f"FOUTMELDING | Script mislukt: {e}")
-        log(greit_connection_string, klant, bron, f"FOUTMELDING | Script mislukt: {e}", script, script_id, tabel)
+        logging.error(f"Script mislukt: {e}")
         
     # Eidn logging
-    end_log(start_time, greit_connection_string, klant, bron, script, script_id)
+    end_log(start_time)
 
 if __name__ == '__main__':
     main()
+    
+    

@@ -1,7 +1,7 @@
 from datetime import timedelta, datetime
 import logging
-import time
 import pyodbc
+import time
 
 class DatabaseHandler(logging.Handler):
     def __init__(self, conn_str, customer, source, script, script_id):
@@ -17,16 +17,16 @@ class DatabaseHandler(logging.Handler):
             self.cursor = self.conn.cursor()
             # Zorg ervoor dat de table bestaat
             self.cursor.execute('''
-                IF NOT EXISTS (SELECT * FROM sysobjects WHERE name='logs' AND xtype='U')
-                CREATE TABLE logs (
-                    id INT IDENTITY PRIMARY KEY,
-                    levelname VARCHAR(50),
-                    message TEXT,
-                    created_at DATETIME,
-                    customer VARCHAR(100),
-                    source VARCHAR(100),
-                    script VARCHAR(100),
-                    script_id INT
+                IF NOT EXISTS (SELECT * FROM sysobjects WHERE name='Logboek' AND xtype='U')
+                CREATE TABLE Logboek (
+                    ID INT IDENTITY PRIMARY KEY,
+                    Niveau VARCHAR(50),
+                    Bericht TEXT,
+                    Datumtijd DATETIME,
+                    Klant VARCHAR(100),
+                    Bron VARCHAR(100),
+                    Script VARCHAR(100),
+                    Script_ID INT
                 )
             ''')
             self.conn.commit()
@@ -44,7 +44,7 @@ class DatabaseHandler(logging.Handler):
             created_at = datetime.fromtimestamp(record.created).strftime('%Y-%m-%d %H:%M:%S')
             
             # Voer de SQL-query uit om het logbericht in de database in te voegen
-            self.cursor.execute("INSERT INTO logs (levelname, message, created_at, customer, source, script, script_id) VALUES (?, ?, ?, ?, ?, ?, ?)",
+            self.cursor.execute("INSERT INTO Logboek (Niveau, Bericht, Datumtijd, Klant, Bron, Script, Script_ID) VALUES (?, ?, ?, ?, ?, ?, ?)",
                                 (record.levelname, log_message, created_at, self.customer, self.source, self.script, self.script_id))
             self.conn.commit()
         except Exception as e:
@@ -81,7 +81,7 @@ def setup_logging(conn_str, klant, bron, script, script_id, log_file='app.log', 
     db_handler.setFormatter(file_formatter)  # Gebruik dezelfde formatter voor de database
     logger.addHandler(db_handler)
 
-    logging.info("Logging is geconfigureerd.")
+    logging.info("Logboek is geconfigureerd.")
 
 # Functie om de starttijd van het script te loggen
 def start_log():

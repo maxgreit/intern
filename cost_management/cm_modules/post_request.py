@@ -1,10 +1,10 @@
 from datetime import datetime, timedelta
-from cm_modules.log import log
 import pandas as pd
 import requests
+import logging
 import time
 
-def post_request(subscription_id, bearer_token, greit_connection_string, klant, bron, script, script_id, start_date_str, end_date_str):
+def post_request(subscription_id, bearer_token, start_date_str, end_date_str):
     # Zet strings om naar datetime-objecten
     start_date = datetime.strptime(start_date_str, "%Y-%m-%d")
     end_date = datetime.strptime(end_date_str, "%Y-%m-%d")
@@ -26,7 +26,7 @@ def post_request(subscription_id, bearer_token, greit_connection_string, klant, 
         if current_end > end_date:
             current_end = end_date
 
-        print(f'Ophalen data van {current_start.strftime("%Y-%m-%d")} tot {current_end.strftime("%Y-%m-%d")}')
+        logging.info(f'Ophalen data van {current_start.strftime("%Y-%m-%d")} tot {current_end.strftime("%Y-%m-%d")}')
 
         cost_body = {
             "type": "ActualCost",
@@ -64,8 +64,7 @@ def post_request(subscription_id, bearer_token, greit_connection_string, klant, 
                 continue
 
             if response.status_code != 200:
-                print(f"Fout bij het ophalen van kosteninformatie: {response.status_code} | {response.text}")
-                log(greit_connection_string, klant, bron, f"FOUTMELDING | Fout bij het ophalen van kosteninformatie: {response.status_code}", script, script_id)
+                logging.error(f"Fout bij het ophalen van kosteninformatie: {response.status_code} | {response.text}")
                 exit(1)
 
             json_data = response.json()
