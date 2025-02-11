@@ -43,6 +43,24 @@ aandelen_taak = BashOperator(
         dag=dag,
 )
 
+inkoop_taak = BashOperator(
+        task_id='inkoop',
+        bash_command=venv_command("/home/greit/klanten/intern/informer/purchases.py"),
+        dag=dag,
+)
+
+verkoop_taak = BashOperator(
+        task_id='verkoop',
+        bash_command=venv_command("/home/greit/klanten/intern/informer/sales.py"),
+        dag=dag,
+)
+
+balans_taak = BashOperator(
+        task_id='balans',
+        bash_command=venv_command("/home/greit/klanten/intern/informer/balance_sheet.py"),
+        dag=dag,
+)
+
 start_parallel_tasks = EmptyOperator(
         task_id='start_parallel_tasks',
         dag=dag,
@@ -57,5 +75,8 @@ end_parallel_tasks = EmptyOperator(
 start_parallel_tasks >> [
     cost_management_taak,
     aandelen_taak,
+    inkoop_taak,
+    verkoop_taak,
+    balans_taak,
 ] >> end_parallel_tasks
                           
