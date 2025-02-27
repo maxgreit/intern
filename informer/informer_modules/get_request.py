@@ -40,7 +40,7 @@ def get_balance_sheet_dataframe(api_url, Apikey, Securitycode, jaar):
     # Loop over elk grootboekrekeningnummer
     for grootboekrekeningnummer in df_1['grootboekrekening_nummer']:
         # Bouw de URL voor de specifieke oproep om alle gegevens voor de hele periode op te halen
-        ledger_url = f"https://api.informer.eu/v1/reports/ledger/?ledger_id={grootboekrekeningnummer}&year_from=2024&year_to={jaar}&period_from=1&period_to=12"
+        ledger_url = f"https://api.informer.eu/v1/reports/ledger/?ledger_id={grootboekrekeningnummer}&year_from={jaar}&year_to={jaar}&period_from=1&period_to=12"
 
         # Maak de GET request naar de API
         try:
@@ -110,7 +110,7 @@ def get_purchase_dataframe(api_url, Apikey, Securitycode):
 
             # Controleer of er nog aankopen zijn, anders stop de loop
             if not purchase_data.get('purchase'):  
-                logging.warning("Er zijn geen aankopen meer om te verwerken.")
+                logging.info("Er zijn geen aankopen meer om te verwerken.")
                 break
 
             # Verwerk de data
@@ -210,7 +210,7 @@ def get_sales_dataframe(api_url, Apikey, Securitycode):
 
             # Controleer of er nog facturen zijn, anders stop de loop
             if not sales_data.get('sales'):
-                logging.warning("Er zijn geen facturen meer om te verwerken.")
+                logging.info("Er zijn geen facturen meer om te verwerken.")
                 break
 
             # Verwerk de sales-data
@@ -312,7 +312,7 @@ def get_hour_dataframe(api_url, Apikey, Securitycode):
 
             # Controleer of er nog facturen zijn, anders stop de loop
             if not sales_data.get('sales'):
-                logging.warning("Er zijn geen facturen meer om te verwerken.")
+                logging.info("Er zijn geen facturen meer om te verwerken.")
                 break
 
             # Verwerk de sales-data
