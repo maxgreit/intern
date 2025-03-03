@@ -60,16 +60,19 @@ def get_balance_sheet_dataframe(api_url, Apikey, Securitycode, jaar):
     # Combineer alle gegevensframes in df_2
     if df_list:
         df_2 = pd.concat(df_list, ignore_index=True)
+        
+        # Voeg lege kolommen toe voor id en name als ze nog niet bestaan
+        if 'id' not in df_2.columns:
+            df_2['id'] = None
+        if 'name' not in df_2.columns:
+            df_2['name'] = None
 
-    # Nu heb je df_2 met de gewenste gegevens per grootboekrekeningnummer voor de hele periode
-
-    # Voeg hier het stukje code toe om 'relation_details' op te splitsen in 'id' en 'name'
-    if 'relation_details' in df_2.columns:
-        df_2['id'] = df_2['relation_details'].apply(lambda x: x['id'] if isinstance(x, dict) and 'id' in x else None)
-        df_2['name'] = df_2['relation_details'].apply(lambda x: x['name'] if isinstance(x, dict) and 'name' in x else None)
-
-    # Verwijder de oorspronkelijke 'relation_details' kolom
-    df_2.drop(columns=['relation_details'], inplace=True)
+        # Alleen relation_details verwerken als deze kolom bestaat
+        if 'relation_details' in df_2.columns:
+            df_2['id'] = df_2['relation_details'].apply(lambda x: x['id'] if isinstance(x, dict) and 'id' in x else None)
+            df_2['name'] = df_2['relation_details'].apply(lambda x: x['name'] if isinstance(x, dict) and 'name' in x else None)
+            # Verwijder de oorspronkelijke 'relation_details' kolom
+            df_2.drop(columns=['relation_details'], inplace=True)
 
     # Merge the two dataframes  
     df_balance_sheet = df_2.merge(df_1, on='grootboekrekening_nummer', how='left')
