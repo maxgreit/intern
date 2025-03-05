@@ -14,15 +14,28 @@ def get_balance_sheet_dataframe(api_url, Apikey, Securitycode, jaar):
     # Define ledger account endpoint
     ledgers_endpoint = "ledgers/"
     ledgers_url = api_url + ledgers_endpoint
+    
+    logging.info(f"API URL die wordt aangeroepen: {ledgers_url}")
+    logging.info(f"Headers (zonder gevoelige data): {{'accept': headers['accept']}}")
 
     # Make the GET request to the API with headers
     try:
+        logging.info("Start API request...")
         ledgers_response = requests.get(ledgers_url, headers=headers)
-    except requests.exceptions.RequestException as e:
-        logging.error(f"Error: {e}")
-
-    if ledgers_response.status_code == 200:
+        logging.info(f"API response status code: {ledgers_response.status_code}")
+        
+        ledgers_response.raise_for_status()  # Dit zal een HTTPError raise voor 4XX/5XX status codes
+        
         ledgers_data = ledgers_response.json()
+        logging.info(f"API response data keys: {list(ledgers_data.keys()) if ledgers_data else 'Geen data'}")
+        
+        if not ledgers_data or 'ledgers' not in ledgers_data:
+            logging.error(f"Geen 'ledgers' gevonden in API response. Response data: {ledgers_data}")
+            raise KeyError("API response bevat geen 'ledgers' data")
+            
+        if not ledgers_data['ledgers']:
+            logging.error("'ledgers' object is leeg in API response")
+            raise ValueError("Geen grootboekrekeningen gevonden")
 
         data = []
         for ledgers, values in ledgers_data['ledgers'].items():
@@ -31,8 +44,15 @@ def get_balance_sheet_dataframe(api_url, Apikey, Securitycode, jaar):
         # Create a DataFrame
         df_1 = pd.DataFrame(data)
 
-    else:
-        logging.error(f"{ledgers_response.status_code} - {ledgers_response.text}")
+    except requests.exceptions.RequestException as e:
+        logging.error(f"API Request fout: {str(e)}")
+        raise
+    except (KeyError, ValueError) as e:
+        logging.error(f"Data verwerkingsfout: {str(e)}")
+        raise
+    except Exception as e:
+        logging.error(f"Onverwachte fout: {str(e)}")
+        raise
 
     # Creëer een lege lijst om de gegevensframes per grootboekrekeningnummer op te slaan
     df_list = []
